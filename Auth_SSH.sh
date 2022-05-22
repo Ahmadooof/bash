@@ -28,34 +28,16 @@ function change_Pattern_Or_Add_it() {
     fi
 }
 
-function turn_Off_Memory_Swap() {
-    commandForCurrentSession="$1"
-    commandForCronJob="$2"
-    filePath="$3"
 
-    # apply swap off for current session
-    $commandForCurrentSession
-
-    if grep -q "^$commandForCronJob" $filePath; then
-        printf "Output: Already swap off when reboot, check: $filePath\n\n"
-    else
-        #write out current crontab if exists in /var/spool/cron/crontabs
-        crontab -l >mycron
-        # echo new cron into cron file
-        echo $commandForCronJob >>mycron
-        #install new cron file
-        crontab mycron
-        # remove our cron file
-        rm mycron
-        printf "Output: Success\n\n"
-    fi
+function Testing(){
+    printf "test\n"
 }
 
 function userInput() {
     read USERINPUT
 
     if [ $USERINPUT == 1 ]; then
-        readEachLineInFile
+        Testing
     elif [ $USERINPUT == 2 ]; then
         change_Pattern_Or_Add_it "/etc/systemd/logind.conf" "#HandleLidSwitch=ignore" "HandleLidSwitch=ignore" "Already disabled" "sudo systemctl restart systemd-logind" "+"
     elif [ $USERINPUT == 3 ]; then
@@ -75,8 +57,6 @@ function userInput() {
         change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "#PubkeyAcceptedAlgorithms +ssh-rsa" "PubkeyAcceptedAlgorithms +ssh-rsa" "Already added" "sudo service ssh restart" "/"
     elif [ $USERINPUT == 8 ]; then
         change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "PubkeyAcceptedAlgorithms +ssh-rsa" "#PubkeyAcceptedAlgorithms +ssh-rsa" "Already removed" "sudo service ssh restart" "/"
-    elif [ $USERINPUT == 9 ]; then
-        turn_Off_Memory_Swap "sudo sudo swapoff -a" "@reboot sudo swapoff -a" "/var/spool/cron/crontabs/root"
 
     else
         printf "Output: Invalid character\n\n"
@@ -96,7 +76,6 @@ Choose a number:
 6.Disable password authentication (Login just with ssh keys if exists)
 7.Add acceptedAlgorithms +ssh-rsa for WinSCP
 8.Remove acceptedAlgorithms +ssh-rsa key for WinSCP
-9.Turn swap memory off (after reboot also will still off)
 \n
 Input:"
 }
