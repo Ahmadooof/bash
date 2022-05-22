@@ -93,6 +93,26 @@ function download_Runc_Extract_CNI() {
     fi
 }
 
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+function forwarding_IPV4() {
+    cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+    sudo modprobe overlay
+    sudo modprobe br_netfilter
+
+    # sysctl params required by setup, params persist across reboots
+    cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+    # Apply sysctl params without reboot
+    sudo sysctl --system
+}
 
 function userInput() {
     read USERINPUT
@@ -105,6 +125,8 @@ function userInput() {
         download_Extract_Run_Runc
     elif [ $USERINPUT == 4 ]; then
         download_Runc_Extract_CNI
+    elif [ $USERINPUT == 5 ]; then
+        forwarding_IPV4
 
     else
         printf "Output: Invalid character\n\n"
@@ -120,6 +142,7 @@ Choose a number:
 2.Download, extract, and run (Containerd)(CRI) version 1.6.4
 3.Download, extract, and run (Runc) version 1.1.2
 4.Download, extract, and run (CNI plugins) version 1.1.1
+5.Forwarding IPv4 and letting iptables see bridged traffic
 
 Input:"
 }
