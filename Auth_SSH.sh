@@ -68,9 +68,9 @@ function userInput() {
             add_Public_SSH_Key "/home/$currentUser/.ssh/authorized_keys"
         fi
     elif [ $USERINPUT == 5 ]; then
-        change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "PasswordAuthentication no" "#PasswordAuthentication no" "Already enabled" "sudo service ssh restart" "+"
+        change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "PasswordAuthentication no" "PasswordAuthentication yes" "Already enabled" "sudo service ssh restart" "+"
     elif [ $USERINPUT == 6 ]; then
-        change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "#PasswordAuthentication no" "PasswordAuthentication no" "Already disabled" "sudo service ssh restart" "+"
+        change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "PasswordAuthentication yes" "PasswordAuthentication no" "Already disabled" "sudo service ssh restart" "+"
     elif [ $USERINPUT == 7 ]; then
         change_Pattern_Or_Add_it "/etc/ssh/sshd_config" "#PubkeyAcceptedAlgorithms +ssh-rsa" "PubkeyAcceptedAlgorithms +ssh-rsa" "Already added" "sudo service ssh restart" "/"
     elif [ $USERINPUT == 8 ]; then
