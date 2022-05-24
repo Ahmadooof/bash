@@ -114,6 +114,46 @@ EOF
     sudo sysctl --system
 }
 
+function install_kubeadm_kubectl_kubelet() {
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl
+    sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    sudo apt-get update
+    sudo apt-get install -y kubelet kubeadm kubectl
+    sudo apt-mark hold kubelet kubeadm kubectl
+}
+
+function add_Default_Configuration_Containerd_File() {
+    mkdir /etc/containerd/
+    touch /etc/containerd/config.toml
+    containerd config default >/etc/containerd/config.toml
+    sudo systemctl restart containerd
+    printf "Output: File has been added to /etc/containerd/config.toml \n"
+}
+
+function systemd_Cgroup_Driver_RunC() {
+    sed -i "s+SystemdCgroup = false+SystemdCgroup = true+g" "/etc/containerd/config.toml"
+    sudo systemctl restart containerd
+}
+
+function create_Cluster() {
+    kubeadm init
+}
+
+function after_Install() {
+    export KUBECONFIG=/etc/kubernetes/admin.conf
+}
+
+function control_Plane_Node_Isolation() {
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
+}
+
+function install_calico_CNI_plugin() {
+    curl https://docs.projectcalico.org/manifests/calico-typha.yaml -o calico.yaml
+    kubectl apply -f calico.yaml
+}
+
 function userInput() {
     read USERINPUT
 
@@ -127,8 +167,23 @@ function userInput() {
         download_Runc_Extract_CNI
     elif [ $USERINPUT == 5 ]; then
         forwarding_IPV4
+    elif [ $USERINPUT == 6 ]; then
+        install_kubeadm_kubectl_kubelet
+    elif [ $USERINPUT == 7 ]; then
+        add_Default_Configuration_Containerd_File
+    elif [ $USERINPUT == 8 ]; then
+        systemd_Cgroup_Driver_RunC
+    elif [ $USERINPUT == 9 ]; then
+        create_Cluster
+    elif [ $USERINPUT == 10 ]; then
+        after_Install
+    elif [ $USERINPUT == 11 ]; then
+        control_Plane_Node_Isolation
+    elif [ $USERINPUT == 12 ]; then
+        install_calico_CNI_plugin
 
     else
+
         printf "Output: Invalid character\n\n"
         showMenu
         userInput
@@ -143,9 +198,18 @@ Choose a number:
 3.Download, extract, and run (Runc) version 1.1.2
 4.Download, extract, and run (CNI plugins) version 1.1.1
 5.Forwarding IPv4 and letting iptables see bridged traffic
-
+6.Install kubeadm, kubectl, kubelet.
+7.Add default configuration (Containerd) file for specifying daemon level options
+8.Use the systemd cgroup driver in /etc/containerd/config.toml with runc
+9.Create the cluster :)
+10.After success installation (if you are root user, otherwise check k8s messages)
+11.Schedule Pods on the control plane nodes, By default, your cluster will not schedule Pods on the control plane nodes for security reasons
+12.Install calico CNI
 Input:"
 }
 
 showMenu
 userInput
+
+#important link
+#https://kubernetes.io/docs/concepts/cluster-administration/addons/
