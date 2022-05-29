@@ -15,4 +15,4 @@ Run the script from 1-12, do not jump between numbers, if you got error in a ste
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/
 
 
-### t
+### test
