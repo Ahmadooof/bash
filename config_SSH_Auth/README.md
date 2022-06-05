@@ -1,2 +1,6 @@
-This script can be used after installing linux.
-you could add ssh key to the server, add, remove password auth, hibernate for laptops, and more..
+## Initial script
+* This script can be used after installing linux.
+* Add ssh key to the server.
+* Add, remove password auth.
+* Add, remove hibernate for laptops.
+* Fix winscp errors.
