@@ -138,7 +138,7 @@ function systemd_Cgroup_Driver_RunC() {
 }
 
 function create_Cluster() {
-    kubeadm init
+    kubeadm init --pod-network-cidr=10.244.0.0/16
 }
 
 function after_Install() {
@@ -152,6 +152,13 @@ function control_Plane_Node_Isolation() {
 function install_calico_CNI_plugin() {
     curl https://docs.projectcalico.org/manifests/calico-typha.yaml -o calico.yaml
     kubectl apply -f calico.yaml
+    remove calico.yaml
+}
+
+function reset(){
+    kubeadm reset
+    iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+    rm -rf $HOME/.kube/config
 }
 
 function userInput() {
@@ -181,6 +188,8 @@ function userInput() {
         control_Plane_Node_Isolation
     elif [ $USERINPUT == 12 ]; then
         install_calico_CNI_plugin
+    elif [ $USERINPUT == 13 ]; then
+        reset
 
     else
 
@@ -205,6 +214,7 @@ Choose a number:
 10.After success installation (if you are root user, otherwise check k8s messages)
 11.Schedule Pods on the control plane nodes, By default, your cluster will not schedule Pods on the control plane nodes for security reasons
 12.Install calico CNI
+13.Apply this if k8s not working properly, then apply step 9,10,11
 Input:"
 }
 
